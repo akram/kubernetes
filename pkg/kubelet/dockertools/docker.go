@@ -316,7 +316,11 @@ func (d *dockerContainerCommandRunner) PortForward(podInfraContainerID string, p
 	}
 
 	containerPid := container.State.Pid
-	// TODO use exec.LookPath for socat / what if the host doesn't have it???
+	// TODO what if the host doesn't have it???
+	_, lookupErr := exec.LookPath("socat")
+	if lookupErr != nil {
+		return fmt.Errorf("Unable to do port forwarding: socat not found.")
+	}
 	args := []string{"-t", fmt.Sprintf("%d", containerPid), "-n", "socat", "-", fmt.Sprintf("TCP4:localhost:%d", port)}
 	// TODO use exec.LookPath
 	command := exec.Command("nsenter", args...)
